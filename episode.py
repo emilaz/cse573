@@ -3,7 +3,7 @@ import random
 import torch
 import time
 import sys
-from constants import GOAL_SUCCESS_REWARD, STEP_PENALTY, BASIC_ACTIONS
+from constants import GOAL_SUCCESS_REWARD, STEP_PENALTY, BASIC_ACTIONS, FOUND_SUCCESS_REWARD
 from environment import Environment
 from utils.net_util import gpuify
 
@@ -19,6 +19,7 @@ class Episode:
         self.strict_done = strict_done
         self.task_data = None
         self.glove_embedding = None
+        self.object_seen=[]
 
         self.seed = args.seed + rank
         random.seed(self.seed)
@@ -58,21 +59,60 @@ class Episode:
         for action in self.actions_taken:
             self.action_step(action)
             time.sleep(delay)
-    
+
+    """""""""
+    ORIGINAL
+    """""""""
+    # def judge(self, action):
+    #     """ Judge the last event. """
+    #     # immediate reward
+    #     reward = STEP_PENALTY
+    #     done = False
+    #     action_was_successful = self.environment.last_action_success
+    #
+    #     if action['action'] == 'Done':
+    #         done = True
+    #         objects = self._env.last_event.metadata['objects']
+    #         visible_objects = [o['objectType'] for o in objects if o['visible']]
+    #         if self.target in visible_objects:
+    #             reward += GOAL_SUCCESS_REWARD
+    #             self.success = True
+    #
+    #     return reward, done, action_was_successful
+    #
+    """"""""""""
+
     def judge(self, action):
         """ Judge the last event. """
         # immediate reward
-        reward = STEP_PENALTY 
+        reward = STEP_PENALTY
         done = False
+        #I think this just returns whether or not the agent could execute the action at all.
         action_was_successful = self.environment.last_action_success
 
         if action['action'] == 'Done':
             done = True
+            #if he chooses Done, he gets 'one last look'
             objects = self._env.last_event.metadata['objects']
             visible_objects = [o['objectType'] for o in objects if o['visible']]
-            if self.target in visible_objects:
+            not_seen_yet=[v for v in visible_objects if v not in self.object_seen and v in self.target]
+            #note: make sure that object_seen is a list
+            self.object_seen+=not_seen_yet
+            if self.target == self.objects_seen:
                 reward += GOAL_SUCCESS_REWARD
                 self.success = True
+
+        elif action['action'] == 'FOUND':
+            objects = self._env.last_event.metadata['objects']
+            visible_objects = [o['objectType'] for o in objects if o['visible']]
+            #we want to make sure to only reward seeing a currently unseen target object
+            not_seen_yet=[v for v in visible_objects if v not in self.object_seen and v in self.target]
+            #have we seen a new object?
+            if not_seen_yet:
+                reward+= FOUND_SUCCESS_REWARD*len(not_seen_yet)
+                self.object_seen+=not_seen_yet
+
+
 
         return reward, done, action_was_successful
 
@@ -94,10 +134,11 @@ class Episode:
         else:
             self._env.reset(scene)
 
-        # For now, single target.
-        self.target = 'Tomato'
+        # Now two targets
+        self.target = ['Tomato','Bowl']
         self.success = False
         self.cur_scene = scene
         self.actions_taken = []
+        self.object_seen= []
         
         return True

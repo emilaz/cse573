@@ -39,6 +39,17 @@ class Model(torch.nn.Module):
         self.critic_linear = nn.Linear(args.hidden_state_sz, 1)
         self.actor_linear = nn.Linear(args.hidden_state_sz, args.action_space)
 
+        """""
+        MINE
+        """""
+        #This is two, for the newly added memory I think...
+        additional_state_size=2
+        #I have no idea what I'm doing here, set this according to slack infos
+        augmented_hidden_size=64
+        self.augmented_linear=nn.Linear(additional_state_size,augmented_hidden_size)
+        self.augmented_combination=nn.Linear(1024+augmented_hidden_size,1024)
+        """"""
+
         self.apply(weights_init)
         relu_gain = nn.init.calculate_gain('relu')
         self.conv1.weight.data.mul_(relu_gain)
@@ -64,6 +75,13 @@ class Model(torch.nn.Module):
         x = F.relu(self.maxp4(self.conv4(x)))
 
         x = x.view(x.size(0), -1)
+        """""
+        MINE
+        TODO: Somewhere here we need to get the info about the seen objects (probably from state) and encode that info into a 2D tensor to feed into
+        self.augmented_linear
+        """""
+        additional_score=self.augmented_linear()
+        augmented_x=self.augmented_combination(torch.cat([x,additional_score]))
         return x
 
     def a3clstm(self, x, hidden):

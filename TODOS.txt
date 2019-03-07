@@ -1,0 +1,11 @@
+Added Bowl to targets (episode.py)
+Added FOUND action to constants.py
+Added FOUND_SUCCESS_REWARD to constants.py
+Imported FOUND_SUCCESS_REWARD to episode.py
+Changed AS size constant in flag_parser.py
+Added self.objects_seen to episode.py
+Made sure objects_seen are reset every episode (new_episode in episode.py)
+Modified judge in episode.py to include FOUND action and updating self.objects_seen
+Modified model.py to include extra layers.
+
+TODO: Find out where we get the extra info about the seen objects from...might be in the passed state object (see forward in model.py), might have to be passed separately.
