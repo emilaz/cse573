@@ -101,8 +101,8 @@ class Episode:
             print('Reward at the beginning of the rountine:', reward)
             #if he chooses Done, he gets 'one last look'
             #go through target, see if we found them, marke as true if we do
+            print('Additional objects seen?')
             for i,v in enumerate(self.target):
-                print('Additional objects seen?')
                 if v in visible_objects and not(self.object_seen[i]):
                     print('Yes, saw', v)
                     self.object_seen[i] = 1
