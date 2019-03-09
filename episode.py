@@ -98,8 +98,9 @@ class Episode:
             #if he chooses Done, he gets 'one last look'
             #go through target, see if we found them, marke as true if we do
             for i,v in enumerate(self.target):
-                if v in visible_objects:
+                if v in visible_objects and not(self.object_seen[i]):
                     self.object_seen[i] = 1
+                    reward+= FOUND_SUCCESS_REWARD
 
             if all(self.object_seen):
                 reward += GOAL_SUCCESS_REWARD

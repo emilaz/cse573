@@ -76,9 +76,10 @@ class Model(torch.nn.Module):
         x = F.relu(self.maxp4(self.conv4(x)))
 
         x = x.view(x.size(0), -1)
-
+        """"""
         additional_score = self.augmented_linear(found)
         augmented_x = self.augmented_combination(torch.cat([x,additional_score],dim=1))
+        """"""
         return augmented_x
 
     def a3clstm(self, x, hidden):
