@@ -1,0 +1,6 @@
+runs
+models
+*__pycache__*
+tensorboard
+turbovnc.deb
+virtualgl.deb

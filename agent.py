@@ -42,6 +42,7 @@ class A3CAgent:
     def eval_at_state(self):
         model_input = ModelInput()
         model_input.state = self.preprocess_frame(self.episode.state_for_agent())
+        model_input.found = gpuify(torch.tensor(self.episode.object_seen,dtype=torch.float).view(1,-1),self.gpu_id)
         model_input.hidden = self.hidden
         model_output = self.model.forward(model_input)
         return model_output

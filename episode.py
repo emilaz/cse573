@@ -90,29 +90,27 @@ class Episode:
         #I think this just returns whether or not the agent could execute the action at all.
         action_was_successful = self.environment.last_action_success
 
+        objects = self._env.last_event.metadata['objects']
+        visible_objects = [o['objectType'] for o in objects if o['visible']]
+
         if action['action'] == 'Done':
             done = True
             #if he chooses Done, he gets 'one last look'
-            objects = self._env.last_event.metadata['objects']
-            visible_objects = [o['objectType'] for o in objects if o['visible']]
-            not_seen_yet=[v for v in visible_objects if v not in self.object_seen and v in self.target]
-            #note: make sure that object_seen is a list
-            self.object_seen+=not_seen_yet
-            if self.target == self.objects_seen:
+            #go through target, see if we found them, marke as true if we do
+            for i,v in enumerate(self.target):
+                if v in visible_objects:
+                    self.object_seen[i] = 1
+
+            if all(self.object_seen):
                 reward += GOAL_SUCCESS_REWARD
                 self.success = True
 
         elif action['action'] == 'FOUND':
-            objects = self._env.last_event.metadata['objects']
-            visible_objects = [o['objectType'] for o in objects if o['visible']]
             #we want to make sure to only reward seeing a currently unseen target object
-            not_seen_yet=[v for v in visible_objects if v not in self.object_seen and v in self.target]
-            #have we seen a new object?
-            if not_seen_yet:
-                reward+= FOUND_SUCCESS_REWARD*len(not_seen_yet)
-                self.object_seen+=not_seen_yet
-
-
+            for i,v in enumerate(self.target):
+                if v in visible_objects and not(self.object_seen[i]):
+                    self.object_seen[i] = 1
+                    reward+= FOUND_SUCCESS_REWARD
 
         return reward, done, action_was_successful
 
@@ -139,6 +137,8 @@ class Episode:
         self.success = False
         self.cur_scene = scene
         self.actions_taken = []
-        self.object_seen= []
+        self.object_seen = []
+        for i in range(len(self.target)):
+            self.object_seen += [0]
         
         return True

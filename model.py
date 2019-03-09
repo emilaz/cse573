@@ -7,8 +7,9 @@ import torchvision
 
 class ModelInput:
     """ Input to the model. """
-    def __init__(self, state=None, hidden=None):
+    def __init__(self, state=None, found=None, hidden=None):
         self.state = state
+        self.found = found
         self.hidden = hidden
 
 class ModelOutput:
@@ -68,21 +69,17 @@ class Model(torch.nn.Module):
 
         self.train()
 
-    def embedding(self, state):
+    def embedding(self, state, found):
         x = F.relu(self.maxp1(self.conv1(state)))
         x = F.relu(self.maxp2(self.conv2(x)))
         x = F.relu(self.maxp3(self.conv3(x)))
         x = F.relu(self.maxp4(self.conv4(x)))
 
         x = x.view(x.size(0), -1)
-        """""
-        MINE
-        TODO: Somewhere here we need to get the info about the seen objects (probably from state) and encode that info into a 2D tensor to feed into
-        self.augmented_linear
-        """""
-        additional_score=self.augmented_linear()
-        augmented_x=self.augmented_combination(torch.cat([x,additional_score]))
-        return x
+
+        additional_score = self.augmented_linear(found)
+        augmented_x = self.augmented_combination(torch.cat([x,additional_score],dim=1))
+        return augmented_x
 
     def a3clstm(self, x, hidden):
         hx, cx = self.lstm(x, hidden)
@@ -93,8 +90,9 @@ class Model(torch.nn.Module):
 
     def forward(self, model_input):
         state = model_input.state
+        found = model_input.found
         (hx, cx) = model_input.hidden
-        x = self.embedding(state)
+        x = self.embedding(state,found)
         actor_out, critic_out, (hx, cx) = self.a3clstm(x, (hx, cx))
 
         return ModelOutput(policy=actor_out, value=critic_out, hidden=(hx, cx))
