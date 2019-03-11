@@ -13,7 +13,8 @@ def train(rank, args, create_shared_model, shared_model,
     """ Training loop for each agent. """
 
     random.seed(args.seed + rank)
-    scene = 'FloorPlan{}_physics'.format( (rank % args.scenes) + 1 )     
+    scene = 'FloorPlan{}_physics'.format( (rank % args.scenes) + 1 )
+    #print(scene)
     setproctitle.setproctitle('Training Agent: {}'.format(rank))
     gpu_id = args.gpu_ids[rank % len(args.gpu_ids)]
 
@@ -34,13 +35,19 @@ def train(rank, args, create_shared_model, shared_model,
         total_reward = 0
         player.eps_len = 0
         new_episode(args, player, scene)
-
-        while not player.done:
+        done_obj_seen = False
+        while not player.done:# and not done_obj_seen:
             # Make sure model is up to date.
             player.sync_with_shared(shared_model)
             # Run episode for num_steps or until player is done.
-            for _ in range(args.num_steps):
+            for cnt in range(args.num_steps):
                 player.action()
+                #if (sum(player.episode.object_seen_bel)==2 and sum(player.episode.object_seen_true)!=2):
+                    #print("ending episode early, steps:",cnt)
+                    #print(player.episode.object_seen_bel, player.episode.object_seen_true)
+                    #print(player.actions)
+                    #done_obj_seen = True
+                    #break
                 total_reward = total_reward + player.reward
                 if player.done:
                     break
@@ -80,7 +87,8 @@ def test(rank, args, create_shared_model, shared_model,
     """ Training loop for each agent. """
 
     random.seed(args.seed + rank)
-    scene = 'FloorPlan4_physics'#.format( 4 - (rank % (4-args.scenes)))     
+    #scene = 'FloorPlan4_physics'#.format( 4 - (rank % (4-args.scenes)))     
+    scene = 'FloorPlan1_physics'#.format( 4 - (rank % (4-args.scenes)))     
     setproctitle.setproctitle('Test Agent: {}'.format(rank))
     gpu_id = args.gpu_ids[rank % len(args.gpu_ids)]
 
