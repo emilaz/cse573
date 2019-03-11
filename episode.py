@@ -95,24 +95,16 @@ class Episode:
 
         if action['action'] == 'Done':
             done = True
-            print('Executed action done')
-            print('Objects seen at the beginning of the rountine:')
-            print(self.object_seen)
-            print('Reward at the beginning of the rountine:', reward)
             #if he chooses Done, he gets 'one last look'
             #go through target, see if we found them, marke as true if we do
             print('Additional objects seen?')
             for i,v in enumerate(self.target):
                 if v in visible_objects and not(self.object_seen[i]):
-                    print('Yes, saw', v)
                     self.object_seen[i] = 1
                     reward+= FOUND_SUCCESS_REWARD
-                    print('New reward:', reward)
 
             if all(self.object_seen):
-                print('Saw all objects.')
                 reward += GOAL_SUCCESS_REWARD
-                print('Final reward',reward)
                 self.success = True
 
         elif action['action'] == 'FOUND':

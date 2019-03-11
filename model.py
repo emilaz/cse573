@@ -77,10 +77,11 @@ class Model(torch.nn.Module):
 
         x = x.view(x.size(0), -1)
         """"""
-        additional_score = self.augmented_linear(found)
-        augmented_x = self.augmented_combination(torch.cat([x,additional_score],dim=1))
+        #additional_score = self.augmented_linear(found)
+        #augmented_x = self.augmented_combination(torch.cat([x,additional_score],dim=1))
         """"""
-        return augmented_x
+        #return augmented_x
+        return x
 
     def a3clstm(self, x, hidden):
         hx, cx = self.lstm(x, hidden)
