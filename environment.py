@@ -105,7 +105,7 @@ class Environment:
     def step(self, action_dict):
         curr_state = ThorAgentState.get_state_from_evenet(event=self.controller.last_event, forced_y=self.y)
         next_state = get_next_state(curr_state, action_dict['action'], copy_state=True)
-        if action_dict['action'] in ['LookUp', 'LookDown', 'RotateLeft', 'RotateRight', 'MoveAhead','FoundTom','FoundBowl']:
+        if action_dict['action'] in ['LookUp', 'LookDown', 'RotateLeft', 'RotateRight', 'MoveAhead','FOUND']:
             if next_state is None:
                 self.last_event.metadata['lastActionSuccess'] = False
             else:
