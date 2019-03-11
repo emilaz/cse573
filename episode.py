@@ -19,7 +19,8 @@ class Episode:
         self.strict_done = strict_done
         self.task_data = None
         self.glove_embedding = None
-        self.object_seen=[]
+        self.object_seen_bel=[]
+        self.object_seen_true=[]
 
         self.seed = args.seed + rank
         random.seed(self.seed)
@@ -94,25 +95,48 @@ class Episode:
         visible_objects = [o['objectType'] for o in objects if o['visible']]
 
         if action['action'] == 'Done':
+            #print("in done")
             done = True
             #if he chooses Done, he gets 'one last look'
             #go through target, see if we found them, marke as true if we do
-            print('Additional objects seen?')
-            for i,v in enumerate(self.target):
-                if v in visible_objects and not(self.object_seen[i]):
-                    self.object_seen[i] = 1
-                    reward+= FOUND_SUCCESS_REWARD
+            #print('Additional objects seen?')
+            #for i,v in enumerate(self.target):
+                #if v in visible_objects and not(self.object_seen[i]):
+                    #self.object_seen[i] = 1
+                    #reward+= FOUND_SUCCESS_REWARD
 
-            if all(self.object_seen):
+            if all(self.object_seen_true):
+                print("REWARD-found all")
                 reward += GOAL_SUCCESS_REWARD
                 self.success = True
 
-        elif action['action'] == 'FOUND':
-            #we want to make sure to only reward seeing a currently unseen target object
-            for i,v in enumerate(self.target):
-                if v in visible_objects and not(self.object_seen[i]):
-                    self.object_seen[i] = 1
-                    reward+= FOUND_SUCCESS_REWARD
+        elif action['action'] == 'FoundTom':
+            
+            #tomato is index 0
+            obj_idx = 0
+            target_obj = self.target[obj_idx]
+            #only reward if first time saying you found the tomato
+            if target_obj in visible_objects and not(self.object_seen_bel[obj_idx]):
+                reward+= FOUND_SUCCESS_REWARD
+                self.object_seen_true[obj_idx] = 1
+                print("REWARD-found tom")
+            #we believe we've seen it so set to true no matter what
+            self.object_seen_bel[obj_idx] = 1
+            #print("setting seen tomato",self.object_seen_bel)
+        
+        elif action['action'] == 'FoundBowl':
+            
+            #bowl is index 1
+            obj_idx = 1
+            target_obj = self.target[obj_idx]
+            #only reward if first time saying you found the bowl
+            if target_obj in visible_objects and not(self.object_seen_bel[obj_idx]):
+                reward+= FOUND_SUCCESS_REWARD
+                self.object_seen_true[obj_idx] = 1
+                print("REWARD-found bowl")
+            #we believe we've seen it so set to true no matter what
+            self.object_seen_bel[obj_idx] = 1
+            #print("setting seen bowl",self.object_seen_bel)
 
         return reward, done, action_was_successful
 
@@ -139,8 +163,9 @@ class Episode:
         self.success = False
         self.cur_scene = scene
         self.actions_taken = []
-        self.object_seen = []
+        self.object_seen_bel = []
+        self.object_seen_true = []
         for i in range(len(self.target)):
-            self.object_seen += [0]
-        
+            self.object_seen_bel += [0]
+            self.object_seen_true += [0] 
         return True
