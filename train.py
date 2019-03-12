@@ -4,9 +4,11 @@ import time
 import setproctitle
 import random
 import os
-
 import torch
+from collections import Counter
+import pandas as pd
 from torch.autograd import Variable
+from constants import BASIC_ACTIONS
 
 def train(rank, args, create_shared_model, shared_model, 
           initialize_agent, optimizer, res_queue, end_flag):
@@ -102,6 +104,10 @@ def test(rank, args, create_shared_model, shared_model,
         torch.cuda.manual_seed(args.seed + rank)
 
     player = initialize_agent(create_shared_model, args, rank, gpu_id=gpu_id)
+    col_names=player.action_space
+    print('bla')
+    print(range(col_names))
+    df=pd.DataFrame(columns=BASIC_ACTIONS)
 
     while not end_flag.value:
 
@@ -129,7 +135,18 @@ def test(rank, args, create_shared_model, shared_model,
         # Log the data from the episode and reset the plyaer.
         if args.enable_logging:
             log_episode(player, res_queue, total_reward=total_reward)
-            
+        
+        c=dict(Counter([d.item()  for d in player.actions]))
+        #add the zeros:
+        for i in range(len(BASIC_ACTIONS)):
+                if i not in c.keys():
+                    c[i]=0
+        keys=list(c.keys()).copy()
+        for basic in keys:
+            c[BASIC_ACTIONS[basic]]=c[basic]
+            del c[basic]
+        df.loc[len(df)]=c
+        print(df)
         reset_player(player)
         
     player.exit()
