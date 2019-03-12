@@ -105,9 +105,7 @@ def test(rank, args, create_shared_model, shared_model,
 
     player = initialize_agent(create_shared_model, args, rank, gpu_id=gpu_id)
     col_names=player.action_space
-    print('bla')
-    print(range(col_names))
-    df=pd.DataFrame(columns=BASIC_ACTIONS)
+    df=pd.DataFrame(columns=BASIC_ACTIONS+['Success'])
 
     while not end_flag.value:
 
@@ -145,6 +143,10 @@ def test(rank, args, create_shared_model, shared_model,
         for basic in keys:
             c[BASIC_ACTIONS[basic]]=c[basic]
             del c[basic]
+        if sum(player._episode.object_seen_true)==2:
+            c['Success']=1
+        else:
+            c['Success']=0
         df.loc[len(df)]=c
         print(df)
         reset_player(player)
