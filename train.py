@@ -149,6 +149,7 @@ def test(rank, args, create_shared_model, shared_model,
             c['Success']=0
         df.loc[len(df)]=c
         print(df)
+        player.episode.slow_replay(delay=1)
         reset_player(player)
         
     player.exit()
