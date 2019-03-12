@@ -106,7 +106,6 @@ class Episode:
                     #reward+= FOUND_SUCCESS_REWARD
 
             if all(self.object_seen_true):
-                print("REWARD-found all")
                 reward += GOAL_SUCCESS_REWARD
                 self.success = True
 
@@ -119,7 +118,6 @@ class Episode:
             if target_obj in visible_objects and not(self.object_seen_bel[obj_idx]):
                 reward+= FOUND_SUCCESS_REWARD
                 self.object_seen_true[obj_idx] = 1
-                print("REWARD-found tom")
             #we believe we've seen it so set to true no matter what
             self.object_seen_bel[obj_idx] = 1
             #print("setting seen tomato",self.object_seen_bel)
@@ -133,7 +131,6 @@ class Episode:
             if target_obj in visible_objects and not(self.object_seen_bel[obj_idx]):
                 reward+= FOUND_SUCCESS_REWARD
                 self.object_seen_true[obj_idx] = 1
-                print("REWARD-found bowl")
             #we believe we've seen it so set to true no matter what
             self.object_seen_bel[obj_idx] = 1
             #print("setting seen bowl",self.object_seen_bel)
