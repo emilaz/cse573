@@ -4,7 +4,9 @@ import time
 import setproctitle
 import random
 import os
-
+import pandas as pd
+from constants import BASIC_ACTIONS
+from collections import Counter
 import torch
 from torch.autograd import Variable
 
@@ -95,6 +97,7 @@ def test(rank, args, create_shared_model, shared_model,
         torch.cuda.manual_seed(args.seed + rank)
 
     player = initialize_agent(create_shared_model, args, rank, gpu_id=gpu_id)
+    df=pd.DataFrame(columns=BASIC_ACTIONS+['Success'])
 
     while not end_flag.value:
 
@@ -122,7 +125,21 @@ def test(rank, args, create_shared_model, shared_model,
         # Log the data from the episode and reset the plyaer.
         if args.enable_logging:
             log_episode(player, res_queue, total_reward=total_reward)
-            
+        c=dict(Counter([d.item() for d in player.actions]))
+        for i in range(len(BASIC_ACTIONS)):
+            if i not in c.keys():
+                c[i]=0
+        keys=list(c.keys()).copy()
+        for basic in keys:
+            c[BASIC_ACTIONS[basic]]=c[basic]
+            del c[basic]
+        #check for succes:
+        if sum(player._episode.object_seen)==2:
+            c['Success']=1
+        else:
+            c['Success']=0
+        df.loc[len(df)]=c
+        print(df)
         reset_player(player)
         
     player.exit()
