@@ -120,7 +120,6 @@ class A3CAgent:
         self.log_probs.append(log_prob)
         self.rewards.append(self.reward)
         self.actions.append(action)
-
         self._increment_episode_length()
 
         # populate the success
