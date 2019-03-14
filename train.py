@@ -111,6 +111,7 @@ def test(rank, args, create_shared_model, shared_model,
             # Run episode for num_steps or until player is done.
             for _ in range(args.num_steps):
                 player.action(training=False)
+ #               print(BASIC_ACTIONS[player.actions[-1].item()])
                 total_reward = total_reward + player.reward
                 if player.done:
                     break

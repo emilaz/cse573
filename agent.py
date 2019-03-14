@@ -114,7 +114,7 @@ class A3CAgent:
         log_prob = log_prob.gather(1, Variable(action))
 
         self.reward, self.done, self.info = self.episode.step(action[0, 0])
-
+        #print(action.item())
         self.entropies.append(entropy)
         self.values.append(model_output.value)
         self.log_probs.append(log_prob)
