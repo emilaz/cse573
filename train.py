@@ -152,7 +152,7 @@ def test(rank, args, create_shared_model, shared_model,
         if counter==500:
             print('DOne!!!!')
             df.to_csv('./Improved.csv',sep='\t')
-#        player.episode.slow_replay(delay=1)
+        player.episode.slow_replay(delay=1)
         counter+=1
         reset_player(player)
         
