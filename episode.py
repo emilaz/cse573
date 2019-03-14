@@ -50,7 +50,8 @@ class Episode:
     def action_step(self, action):
         self.environment.step(action)
         reward, terminal, action_was_successful = self.judge(action)
-
+        print(action)
+        time.sleep(1)
         return reward, terminal, action_was_successful
 
     def slow_replay(self, delay=0.2):
