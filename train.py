@@ -106,9 +106,9 @@ def test(rank, args, create_shared_model, shared_model,
     player = initialize_agent(create_shared_model, args, rank, gpu_id=gpu_id)
     col_names=player.action_space
     df=pd.DataFrame(columns=BASIC_ACTIONS+['Success'])
-
+    counter=0
     while not end_flag.value:
-
+        c=Counter()
         # Start a new episode.
         total_reward = 0
         player.eps_len = 0
@@ -127,6 +127,7 @@ def test(rank, args, create_shared_model, shared_model,
 
             # Clear actions and repackage hidden.
             if not player.done:
+                c+=Counter([d.item() for d in player.actions])
                 reset_player(player)
         
         
@@ -134,7 +135,7 @@ def test(rank, args, create_shared_model, shared_model,
         if args.enable_logging:
             log_episode(player, res_queue, total_reward=total_reward)
         
-        c=dict(Counter([d.item()  for d in player.actions]))
+        c=dict(c+Counter([d.item()  for d in player.actions]))
         #add the zeros:
         for i in range(len(BASIC_ACTIONS)):
                 if i not in c.keys():
@@ -148,8 +149,11 @@ def test(rank, args, create_shared_model, shared_model,
         else:
             c['Success']=0
         df.loc[len(df)]=c
-        print(df)
-        player.episode.slow_replay(delay=1)
+        if counter==500:
+            print('DOne!!!!')
+            df.to_csv('./Improved.csv',sep='\t')
+#        player.episode.slow_replay(delay=1)
+        counter+=1
         reset_player(player)
         
     player.exit()
